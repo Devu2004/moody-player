@@ -1,0 +1,17 @@
+.song-Container{
+    /* background-color: red; */
+    margin-top: 1rem;
+}
+.song-Container h2{
+    font-size: 2rem;
+    line-height: normal;
+    text-transform: capitalize;
+}
+.song-Container .song{
+    /* background-color: green; */
+    margin:.5rem 0 .2rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .5rem;
+}

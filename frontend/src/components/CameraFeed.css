@@ -1,0 +1,32 @@
+.mainContainer{
+    width: 100%;
+    height: 100%;
+    /* background-color: red; */
+    display: flex;
+    align-items: center;
+    gap: 15rem;
+}
+.mainContainer video{
+    object-fit: cover;
+    border-radius: 10px;
+    width: fit-content;
+    height: fit-content;
+}
+.mainContainer .detectButton{
+    padding: 10px 20px;
+    font-size: 1rem;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    text-transform: capitalize;
+    background-color: salmon;
+    color: white;
+    cursor: pointer;
+    transition: .3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.detectButton:hover{
+    background-color: rgb(246, 108, 92);
+}
+.detectButton:active{
+    transform: scale(0.95);
+}
