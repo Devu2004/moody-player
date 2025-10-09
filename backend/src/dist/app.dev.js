@@ -9,7 +9,7 @@ var Songsrouter = require('./routes/Song.routes');
 var server = express();
 server.use(cors());
 server.use(express.json());
-server.use('/', Songsrouter);
+server.use('/songs', Songsrouter);
 server.get('/', function (req, res) {
   res.send('Moody Player Backend Running');
 });
