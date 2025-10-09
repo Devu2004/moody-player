@@ -90,7 +90,7 @@ export default function CameraFeed({ setSong, Song = [] }) {
       }
       setDetectedMood(_expression);
       const response = await axios.get(
-        `https://moody-player-backend-ma12.onrender.com`
+        `https://moody-player-backend-ma12.onrender.com/songs?mood=${_expression}`
       );
       if (response.data?.songs?.length) {
         setSong(response.data.songs);
