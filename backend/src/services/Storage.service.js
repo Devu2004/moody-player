@@ -1,5 +1,6 @@
 const ImageKit = require("imagekit");
 const dotenv = require("dotenv");
+var mongoose = require('mongoose')
 
 dotenv.config();
 
@@ -13,8 +14,9 @@ function uploadFile(file) {
   return new Promise((resolve, reject) => {
     imagekit.upload(
       {
-        file: file.buffer, // if coming from multer
-        fileName: "hello-backend.jpg",
+        file: file.buffer, 
+        fileName:(new mongoose.Types.ObjectId()).toString(),
+        folder:'Moody-player-songs'
       },
       (error, result) => {
         if (error) reject(error);

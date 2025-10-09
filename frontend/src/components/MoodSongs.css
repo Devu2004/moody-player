@@ -1,17 +1,139 @@
-.song-Container{
-    /* background-color: red; */
-    margin-top: 1rem;
+:root {
+  --bg-gradient: linear-gradient(135deg, #1a1a1a, #262626);
+  --text-color: #f5f5f5;
+  --secondary-text: #aaa;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --border-glow: 0 0 10px rgba(0, 255, 174, 0.3);
+  --transition: all 0.3s ease;
 }
-.song-Container h2{
-    font-size: 2rem;
-    line-height: normal;
-    text-transform: capitalize;
+
+.song-Container {
+  width: 100%;
+  max-width: 900px; 
+  margin: 0.6rem auto;
+  padding: 2rem;
+  background: #232946;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  color: var(--text-color);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 1.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
 }
-.song-Container .song{
-    /* background-color: green; */
-    margin:.5rem 0 .2rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: .5rem;
+
+.song-Container h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #fffffe;
+  letter-spacing: 1px;
+}
+
+.song {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+
+.song:hover {
+  background: var(--hover-bg);
+  transform: translateY(-3px);
+}
+
+.title h3 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #fff;
+  font-weight: 700;
+}
+
+.title p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--secondary-text);
+  opacity: 0.6;
+}
+
+.playPauseButtons button {
+  background: #eebbc3;
+  border: none;
+  color: #232946;
+  font-size: 1.4rem;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; 
+}
+
+.playPauseButtons button:hover {
+  transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .song-Container {
+    padding: 1rem;
+  }
+
+  .song-Container h2 {
+    font-size: 1.8rem;
+  }
+
+  .song {
+    padding: 0.8rem 1.2rem;
+  }
+
+  .title h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .song-Container {
+    width: 95%;
+    padding: 0.8rem;
+    margin: 0 auto;
+    min-height: 90vh;
+  }
+
+  .song-Container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .song {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .playPauseButtons button {
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+  }
 }

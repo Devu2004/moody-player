@@ -1,15 +1,14 @@
+import { useState } from "react";
+import CameraFeed from "./components/CameraFeed";
 
-import './App.css'
-import CameraFeed from './components/CameraFeed'
-import MoodSongs from './components/MoodSongs'
 function App() {
+  const [Song, setSong] = useState([]); // Empty array 
 
   return (
     <>
-      <CameraFeed/>
-      <MoodSongs/>
+      <CameraFeed setSong={setSong} Song={Song} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
