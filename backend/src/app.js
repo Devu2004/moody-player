@@ -7,7 +7,7 @@ const server = express();
 server.use(cors());
 server.use(express.json());
 
-server.use('/songs', Songsrouter);
+server.use('/', Songsrouter);
 
 server.get('/', (req, res) => {
   res.send('Moody Player Backend Running');
