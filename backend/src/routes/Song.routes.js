@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
   try {
     const { mood } = req.query;
     const songs = await songModel.find({ mood: mood });
-    res.status(200).json({ message: 'Songs fetched!', songs });
+    res.status(200).json({ message: 'Songs fetched!', songs:songs });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
