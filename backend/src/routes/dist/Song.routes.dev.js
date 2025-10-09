@@ -14,7 +14,7 @@ var upload = multer({
 
 var songModel = require('../models/Song.model');
 
-router.post('/', upload.single('audio'), function _callee(req, res) {
+router.post('/songs', upload.single('audio'), function _callee(req, res) {
   var fileData, song;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
@@ -69,7 +69,7 @@ router.post('/', upload.single('audio'), function _callee(req, res) {
     }
   }, null, null, [[0, 12]]);
 });
-router.get('/', function _callee2(req, res) {
+router.get('/songs', function _callee2(req, res) {
   var mood, songs;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {

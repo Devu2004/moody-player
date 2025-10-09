@@ -5,7 +5,7 @@ const uploadFile = require('../services/Storage.service');
 const upload = multer({ storage: multer.memoryStorage() });
 const songModel = require('../models/Song.model');
 
-router.post('/', upload.single('audio'), async (req, res) => {
+router.post('/songs', upload.single('audio'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
@@ -23,7 +23,7 @@ router.post('/', upload.single('audio'), async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/songs', async (req, res) => {
   try {
     const { mood } = req.query;
     const songs = await songModel.find({ mood });
