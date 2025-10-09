@@ -50,7 +50,7 @@ router.post('/songs', upload.single('audio'), function _callee(req, res) {
     }
   });
 });
-router.get('/songs', function _callee2(req, res) {
+router.get('/', function _callee2(req, res) {
   var mood, songs;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
