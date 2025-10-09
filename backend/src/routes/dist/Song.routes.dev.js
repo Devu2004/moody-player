@@ -51,19 +51,18 @@ router.post('/', upload.single('audio'), function _callee(req, res) {
             message: 'Song created!',
             song: song
           });
-          _context.next = 16;
+          _context.next = 15;
           break;
 
         case 12:
           _context.prev = 12;
           _context.t0 = _context["catch"](0);
-          console.error(_context.t0);
           res.status(500).json({
             message: 'Internal Server Error',
             error: _context.t0.message
           });
 
-        case 16:
+        case 15:
         case "end":
           return _context.stop();
       }
@@ -71,44 +70,40 @@ router.post('/', upload.single('audio'), function _callee(req, res) {
   }, null, null, [[0, 12]]);
 });
 router.get('/', function _callee2(req, res) {
-  var mood, filter, songs;
+  var mood, songs;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
           _context2.prev = 0;
           mood = req.query.mood;
-          console.log("Mood received:", mood);
-          filter = mood ? {
+          _context2.next = 4;
+          return regeneratorRuntime.awrap(songModel.find({
             mood: mood
-          } : {};
-          _context2.next = 6;
-          return regeneratorRuntime.awrap(songModel.find(filter));
+          }));
 
-        case 6:
+        case 4:
           songs = _context2.sent;
-          console.log("Songs found:", songs.length);
           res.status(200).json({
             message: 'Songs fetched!',
             songs: songs
           });
-          _context2.next = 15;
+          _context2.next = 11;
           break;
 
-        case 11:
-          _context2.prev = 11;
+        case 8:
+          _context2.prev = 8;
           _context2.t0 = _context2["catch"](0);
-          console.error("Error fetching songs:", _context2.t0);
           res.status(500).json({
             message: 'Internal Server Error',
             error: _context2.t0.message
           });
 
-        case 15:
+        case 11:
         case "end":
           return _context2.stop();
       }
     }
-  }, null, null, [[0, 11]]);
+  }, null, null, [[0, 8]]);
 });
 module.exports = router;

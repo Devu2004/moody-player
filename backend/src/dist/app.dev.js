@@ -15,6 +15,6 @@ server.get('/', function (req, res) {
 });
 var PORT = process.env.PORT || 3000;
 server.listen(PORT, function () {
-  console.log("Server running on port ".concat(PORT));
+  return console.log("Server running on port ".concat(PORT));
 });
 module.exports = server;

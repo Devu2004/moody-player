@@ -1,9 +1,9 @@
-const express = require('express')
-const multer = require('multer')
+const express = require('express');
+const multer = require('multer');
 const router = express.Router();
-const uploadFile = require('../services/Storage.service')
-const upload = multer({storage:multer.memoryStorage()})
-const songModel = require('../models/Song.model')
+const uploadFile = require('../services/Storage.service');
+const upload = multer({ storage: multer.memoryStorage() });
+const songModel = require('../models/Song.model');
 
 router.post('/', upload.single('audio'), async (req, res) => {
   try {
@@ -16,28 +16,21 @@ router.post('/', upload.single('audio'), async (req, res) => {
       audio: fileData.url,
       mood: req.body.mood
     });
+
     res.status(201).json({ message: 'Song created!', song });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
-
 
 router.get('/', async (req, res) => {
   try {
     const { mood } = req.query;
-    console.log("Mood received:", mood);
-    const filter = mood ? { mood } : {};
-    const songs = await songModel.find(filter);
-    console.log("Songs found:", songs.length);
+    const songs = await songModel.find({ mood });
     res.status(200).json({ message: 'Songs fetched!', songs });
   } catch (err) {
-    console.error("Error fetching songs:", err);
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
 
-
-
-module.exports = router
+module.exports = router;
