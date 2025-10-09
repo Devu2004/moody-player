@@ -1,23 +1,34 @@
+// src/components/CameraFeed.jsx
 import * as faceapi from "face-api.js";
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import MoodSongs from "./MoodSongs";
 import "./CameraFeed.css";
 
+const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+
 export default function CameraFeed({ setSong, Song = [] }) {
-  const videoRef = useRef();
+  const videoRef = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [error, setError] = useState("");
   const [detectedMood, setDetectedMood] = useState("");
   const [isFaceDetected, setIsFaceDetected] = useState(false);
   const [showSongs, setShowSongs] = useState(false);
 
+  // 1. Load models once
   useEffect(() => {
     const loadModels = async () => {
       try {
-        const MODEL_URL = "/models";
-        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+        const MODEL_URL = `${import.meta.env.BASE_URL}models`; // Vite-friendly
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL) // optional but helpful
+        ]);
+        setModelsLoaded(true);
+        console.log("Face-api models loaded from", MODEL_URL);
       } catch (err) {
         console.error("Model loading failed:", err);
         setError("Error loading AI models. Please refresh the page.");
@@ -26,70 +37,89 @@ export default function CameraFeed({ setSong, Song = [] }) {
     loadModels();
   }, []);
 
-  //  useEffect to manage the camera stream 
+  // 2. Start/stop video stream
   useEffect(() => {
-    const startVideo = () => {
-      if (videoRef.current && !videoRef.current.srcObject) { // Check if it's not already running
-        navigator.mediaDevices
-          .getUserMedia({ video: true })
-          .then((stream) => {
-            if (videoRef.current) {
-              videoRef.current.srcObject = stream;
-              setLoading(false);
-            }
-          })
-          .catch((err) => {
-            console.error("Error accessing webcam:", err);
-            setError("Cannot access camera. Please allow webcam permissions.");
-          });
+    let localStream = null;
+    const start = async () => {
+      try {
+        if (!videoRef.current) return;
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoRef.current.srcObject = localStream;
+        await videoRef.current.play();
+        setVideoReady(true);
+        setLoading(false);
+        console.log("Camera started");
+      } catch (err) {
+        console.error("Camera error:", err);
+        setError("Cannot access camera. Please allow webcam permissions.");
+        setLoading(false);
       }
     };
 
-    const stopVideo = () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
-        const tracks = stream.getTracks();
-        tracks.forEach((track) => track.stop()); // Stop all tracks
-        videoRef.current.srcObject = null; // Clear the reference
-        console.log("Camera stream stopped.");
+    const stop = () => {
+      if (localStream) {
+        localStream.getTracks().forEach((t) => t.stop());
+        localStream = null;
       }
+      if (videoRef.current) videoRef.current.srcObject = null;
+      setVideoReady(false);
+      console.log("Camera stopped");
     };
 
-    if (showSongs) {
-      stopVideo();
-    } else {
-      startVideo();
-    }
+    if (!showSongs) start();
+    else stop();
 
-    return () => {
-        stopVideo();
-    };
-  }, [showSongs]); 
+    return () => stop();
+  }, [showSongs]);
 
-  // Detect mood function 
+  // 3. Detect mood
   const detectMood = async () => {
     setError("");
     setDetectedMood("");
     setIsFaceDetected(false);
+
+    if (!modelsLoaded) {
+      setError("Models are not loaded yet. Please wait.");
+      return;
+    }
+    if (!videoReady || !videoRef.current) {
+      setError("Camera not ready. Try again.");
+      return;
+    }
+
     try {
-      const detections = await faceapi
-        .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+      // use detectSingleFace to simplify
+      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+      const detection = await faceapi
+        .detectSingleFace(videoRef.current, options)
+        .withFaceLandmarks()
         .withFaceExpressions();
-      if (!detections || detections.length === 0) {
+
+      if (!detection) {
         setError("😕 No face detected! Try again.");
         return;
       }
+
       setIsFaceDetected(true);
-      let mostProbableExpression = 0;
-      let _expression = "";
-      for (const exp of Object.keys(detections[0].expressions)) {
-        if (detections[0].expressions[exp] > mostProbableExpression) {
-          mostProbableExpression = detections[0].expressions[exp];
-          _expression = exp;
-        }
+      console.log("Raw expressions:", detection.expressions);
+
+      // find most probable expression
+      let entries = Object.entries(detection.expressions);
+      entries.sort((a, b) => b[1] - a[1]);
+      let top = entries[0] ? entries[0][0] : null;
+      if (!top) {
+        setError("Could not determine expression. Try again.");
+        return;
       }
-      setDetectedMood(_expression);
-      const response = await axios.get(`https://moody-player-backend-ma12.onrender.com/songs?mood=${_expression}`)
+
+      const normalizedMood = top.toLowerCase();
+      setDetectedMood(normalizedMood);
+      console.log("Detected mood -> sending to API:", normalizedMood);
+
+      // call backend
+      const url = `${BACKEND}/songs?mood=${encodeURIComponent(normalizedMood)}`;
+      const response = await axios.get(url, { timeout: 10000 });
+      console.log("API response:", response.data);
 
       if (response.data?.songs?.length) {
         setSong(response.data.songs);
@@ -98,12 +128,12 @@ export default function CameraFeed({ setSong, Song = [] }) {
         setError("No songs found for this mood.");
       }
     } catch (err) {
-      console.error(err);
-      setError("Error detecting mood. Try again.");
+      console.error("Detect/Fetch error:", err);
+      setError(err?.response?.data?.message || "Error detecting mood. Try again.");
     }
   };
 
-  // Reset function 
+  // Reset & back handlers
   const handleReset = () => {
     setSong([]);
     setDetectedMood("");
@@ -111,8 +141,6 @@ export default function CameraFeed({ setSong, Song = [] }) {
     setIsFaceDetected(false);
     setShowSongs(false);
   };
-
-  
   const handleBack = () => {
     setShowSongs(false);
     setSong([]);
@@ -121,7 +149,6 @@ export default function CameraFeed({ setSong, Song = [] }) {
 
   return (
     <div className={`mainContainer ${showSongs ? "songsMode" : "cameraMode"}`}>
-      {/* CAMERA VIEW */}
       {!showSongs && (
         <>
           {loading && <p className="statusMsg">⏳ Loading models & camera...</p>}
@@ -133,20 +160,18 @@ export default function CameraFeed({ setSong, Song = [] }) {
             playsInline
             className={`cameraFeed ${isFaceDetected ? "active" : ""}`}
           />
-          
           <div className="btnContainer">
-            <button onClick={detectMood} className="detectButton">Detect Mood</button>
+            <button onClick={detectMood} className="detectButton" disabled={!modelsLoaded || !videoReady}>
+              Detect Mood
+            </button>
             <button onClick={handleReset} className="refreshButton">🔄 Refresh</button>
           </div>
         </>
       )}
 
-      {/* SONGS VIEW */}
       {showSongs && (
         <div className="songsView">
-          {detectedMood && (
-            <p className="detectedMood">Detected Mood - {detectedMood}</p>
-          )}
+          {detectedMood && <p className="detectedMood">Detected Mood - {detectedMood}</p>}
           <MoodSongs Song={Song} />
           <button onClick={handleBack} className="backButton">← Back to Camera</button>
         </div>
