@@ -71,41 +71,44 @@ router.post('/', upload.single('audio'), function _callee(req, res) {
   }, null, null, [[0, 12]]);
 });
 router.get('/', function _callee2(req, res) {
-  var mood, songs;
+  var mood, filter, songs;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
           _context2.prev = 0;
           mood = req.query.mood;
-          _context2.next = 4;
-          return regeneratorRuntime.awrap(songModel.find({
+          console.log("Mood received:", mood);
+          filter = mood ? {
             mood: mood
-          }));
+          } : {};
+          _context2.next = 6;
+          return regeneratorRuntime.awrap(songModel.find(filter));
 
-        case 4:
+        case 6:
           songs = _context2.sent;
+          console.log("Songs found:", songs.length);
           res.status(200).json({
             message: 'Songs fetched!',
             songs: songs
           });
-          _context2.next = 12;
+          _context2.next = 15;
           break;
 
-        case 8:
-          _context2.prev = 8;
+        case 11:
+          _context2.prev = 11;
           _context2.t0 = _context2["catch"](0);
-          console.error(_context2.t0);
+          console.error("Error fetching songs:", _context2.t0);
           res.status(500).json({
             message: 'Internal Server Error',
             error: _context2.t0.message
           });
 
-        case 12:
+        case 15:
         case "end":
           return _context2.stop();
       }
     }
-  }, null, null, [[0, 8]]);
+  }, null, null, [[0, 11]]);
 });
 module.exports = router;
