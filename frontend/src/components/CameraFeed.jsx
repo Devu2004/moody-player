@@ -114,7 +114,6 @@ export default function CameraFeed({ setSong, Song = [] }) {
 
       const normalizedMood = top.toLowerCase();
       setDetectedMood(normalizedMood);
-      console.log("Detected mood -> sending to API:", normalizedMood);
 
       // call backend
       const url = `${BACKEND}/songs?mood=${encodeURIComponent(normalizedMood)}`;

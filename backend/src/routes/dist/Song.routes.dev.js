@@ -51,18 +51,19 @@ router.post('/', upload.single('audio'), function _callee(req, res) {
             message: 'Song created!',
             song: song
           });
-          _context.next = 15;
+          _context.next = 16;
           break;
 
         case 12:
           _context.prev = 12;
           _context.t0 = _context["catch"](0);
+          console.error("Error creating song:", _context.t0);
           res.status(500).json({
             message: 'Internal Server Error',
             error: _context.t0.message
           });
 
-        case 15:
+        case 16:
         case "end":
           return _context.stop();
       }
@@ -77,33 +78,59 @@ router.get('/', function _callee2(req, res) {
         case 0:
           _context2.prev = 0;
           mood = req.query.mood;
-          _context2.next = 4;
-          return regeneratorRuntime.awrap(songModel.find({
-            mood: mood
+          console.log("Received mood for search:", mood);
+
+          if (mood) {
+            _context2.next = 5;
+            break;
+          }
+
+          return _context2.abrupt("return", res.status(400).json({
+            message: 'Mood query parameter is required.'
           }));
 
-        case 4:
+        case 5:
+          _context2.next = 7;
+          return regeneratorRuntime.awrap(songModel.find({
+            mood: new RegExp(mood, 'i')
+          }));
+
+        case 7:
           songs = _context2.sent;
+          console.log('Songs found in DB:', songs);
+
+          if (!(songs.length === 0)) {
+            _context2.next = 11;
+            break;
+          }
+
+          return _context2.abrupt("return", res.status(200).json({
+            message: 'No songs found for this mood.',
+            songs: []
+          }));
+
+        case 11:
           res.status(200).json({
             message: 'Songs fetched!',
             songs: songs
           });
-          _context2.next = 11;
+          _context2.next = 18;
           break;
 
-        case 8:
-          _context2.prev = 8;
+        case 14:
+          _context2.prev = 14;
           _context2.t0 = _context2["catch"](0);
+          console.error("Error fetching songs:", _context2.t0);
           res.status(500).json({
             message: 'Internal Server Error',
             error: _context2.t0.message
           });
 
-        case 11:
+        case 18:
         case "end":
           return _context2.stop();
       }
     }
-  }, null, null, [[0, 8]]);
+  }, null, null, [[0, 14]]);
 });
 module.exports = router;
