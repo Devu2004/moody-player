@@ -116,6 +116,7 @@ body {
   .cameraFeed {
     width: 100%;
     object-fit: cover;
+    transform:scaleX(-1)
   }
 }
 
@@ -131,6 +132,7 @@ body {
     width: auto;  
     max-width: 95vw;
     object-fit: cover;
+    transform:scaleX(-1)
   }
 
   .btnContainer {
