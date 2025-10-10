@@ -25,7 +25,7 @@ export default function CameraFeed({ setSong, Song = [] }) {
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
           faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL) // optional but helpful
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
         ]);
         setModelsLoaded(true);
         console.log("Face-api models loaded from", MODEL_URL);
@@ -78,17 +78,12 @@ export default function CameraFeed({ setSong, Song = [] }) {
     setDetectedMood("");
     setIsFaceDetected(false);
 
-    if (!modelsLoaded) {
-      setError("Models are not loaded yet. Please wait.");
-      return;
-    }
-    if (!videoReady || !videoRef.current) {
-      setError("Camera not ready. Try again.");
+    if (!modelsLoaded || !videoReady || !videoRef.current) {
+      setError("Camera/models not ready. Try again.");
       return;
     }
 
     try {
-      // use detectSingleFace to simplify
       const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
       const detection = await faceapi
         .detectSingleFace(videoRef.current, options)
@@ -101,9 +96,8 @@ export default function CameraFeed({ setSong, Song = [] }) {
       }
 
       setIsFaceDetected(true);
-      console.log("Raw expressions:", detection.expressions);
+      console.log("Raw expressions:", detection.expressions); // Helpful for debugging
 
-      // find most probable expression
       let entries = Object.entries(detection.expressions);
       entries.sort((a, b) => b[1] - a[1]);
       let top = entries[0] ? entries[0][0] : null;
@@ -113,13 +107,15 @@ export default function CameraFeed({ setSong, Song = [] }) {
       }
 
       const normalizedMood = top.toLowerCase();
+      
+      // --- THIS IS THE EDITED LINE ---
+      console.log("1. FRONTEND SE BHEJA GAYA MOOD:", `'${normalizedMood}'`);
+      
       setDetectedMood(normalizedMood);
 
-      // call backend
       const url = `${BACKEND}/songs?mood=${encodeURIComponent(normalizedMood)}`;
       const response = await axios.get(url, { timeout: 10000 });
-      console.log("API response:", response.data);
-
+      
       if (response.data?.songs?.length) {
         setSong(response.data.songs);
         setShowSongs(true);

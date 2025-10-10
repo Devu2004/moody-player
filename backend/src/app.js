@@ -1,10 +1,20 @@
 const express = require('express');
 const cors = require('cors');
-const Songsrouter = require('./routes/Song.routes');
+const Songsrouter = require('./routes/Song.routes'); // Make sure this path is correct
 
 const server = express();
 
-server.use(cors());
+const corsOptions = {
+  origin: [
+    'http://localhost:5173', 
+    'https://moody-player-frontend-c3sr.onrender.com' 
+  ],
+  methods: "GET,POST,PUT,DELETE,PATCH,HEAD",
+  credentials: true,
+};
+
+server.use(cors(corsOptions));
+
 server.use(express.json());
 
 server.use('/songs', Songsrouter);
@@ -13,7 +23,4 @@ server.get('/', (req, res) => {
   res.send('Moody Player Backend Running');
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-module.exports = server
+module.exports = server;
